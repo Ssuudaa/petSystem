@@ -46,7 +46,7 @@
         <el-button round @click="reset">重置</el-button>
         <div class="button">
           <el-button type="primary" @click="addPetSys()"  style="margin-left: -12px;">医院介绍模块配置</el-button>
-          <el-button type="success" @click="addPetInfo()" >宠物百科模块配置</el-button>
+          <el-button type="success" @click="addPetInfo()" >爱宠百科模块配置</el-button>
           <el-button type="warning" @click="addTeamInfo()" >医疗团队模块配置</el-button>
           <el-button type="danger" @click="addAboutUs()" >关于我们模块配置</el-button>
         </div>
@@ -186,9 +186,9 @@
     </el-form-item>
 
     <!-- 介绍标题 -->
-    <el-form-item label="介绍标题" :rules="[{ required: true, message: '请输入介绍标题', trigger: 'blur' }]">
+    <!-- <el-form-item label="介绍标题" :rules="[{ required: true, message: '请输入介绍标题', trigger: 'blur' }]">
       <el-input v-model="petsys.title" placeholder="请输入介绍标题"></el-input>
-    </el-form-item>
+    </el-form-item> -->
 
     <!-- 介绍内容 -->
     <el-form-item label="介绍内容" :rules="[{ required: true, message: '请输入介绍内容', trigger: 'blur' }]">
@@ -242,7 +242,7 @@
   </el-form>
 </el-dialog>
 
-      <el-dialog :visible.sync="petInfoDialogVisible" title="宠物百科模块配置">
+      <el-dialog :visible.sync="petInfoDialogVisible" title="爱宠百科模块配置">
   <el-tabs type="card">
     <!-- 宠物1 -->
     <el-tab-pane label="宠物1">

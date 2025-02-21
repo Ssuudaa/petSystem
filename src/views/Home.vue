@@ -11,7 +11,7 @@
         <div class="nav-container">
           <el-menu mode="horizontal" class="nav-menu" :default-active="activeMenu">
   <el-menu-item index="home" @click="scrollToSection('hospital')"><a>医院介绍</a></el-menu-item>
-  <el-menu-item index="petInfo" @click="scrollToSection('petInfo')"><a>宠物百科</a></el-menu-item>
+  <el-menu-item index="petInfo" @click="scrollToSection('petInfo')"><a>爱宠百科</a></el-menu-item>
   <el-menu-item index="teamCarousel" @click="scrollToSection('teamCarousel')"><a>医疗团队</a></el-menu-item>
   <el-menu-item index="team" @click="scrollToSection('team')"><a>宠物服务</a></el-menu-item>
   <el-menu-item index="aboutUs" @click="scrollToSection('aboutUs')"><a>关于我们</a></el-menu-item>
