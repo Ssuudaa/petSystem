@@ -29,12 +29,6 @@
                 <i class="material-icons left"></i>首次登录? 注册
               </router-link>
             </div>
-  
-            <div class="row">
-              <router-link to="/reset-password" class="waves-effect waves-light btn-flat right">
-                忘记密码?
-              </router-link>
-            </div>
           </div>
         </div>
       </div>
@@ -168,8 +162,7 @@
   .sign-up-button {
     width: 100%;
     margin-top: 10px;
-    background-color: #ff4081;
-    color: white;
+    color: black;
   }
   
   a {

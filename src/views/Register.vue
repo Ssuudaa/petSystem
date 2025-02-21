@@ -182,8 +182,7 @@ export default {
 .sign-up-button {
   width: 100%;
   margin-top: 10px;
-  background-color: #ff4081;
-  color: white;
+  color: black;
 }
 
 a {

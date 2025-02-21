@@ -8,12 +8,7 @@ import AboutUs from '@/views/Home.vue'
 import Team from '@/views/Home.vue' 
 import TeamCarousel from '@/views/Home.vue' 
 import PetInfo from '@/views/Home.vue' 
-
-
-
-
-
-
+import User from '@/views/User.vue' 
 
 
 Vue.use(Router)
@@ -59,6 +54,11 @@ export default new Router({
         path: '/PetInfo',
         name: 'PetInfo',
         component: PetInfo 
+      },
+      {
+        path: '/User',
+        name: 'User',
+        component: User 
       },
   ]
 })

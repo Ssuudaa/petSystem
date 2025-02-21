@@ -18,6 +18,7 @@
 </el-menu>
   
           <!-- 右上角 登录/注册 按钮 -->
+          <el-button @click="goToSetting"  type="success" round>配置管理</el-button>
           <el-button @click="goToLogin" class="login-btn" type="danger" round v-if="!isLoggedIn">登录/注册</el-button>
           <el-button v-else @click="logout" class="login-btn" type="danger" round>退出</el-button>
           <el-button @click="1" class="login-btn" type="danger" round style="margin-right:50px ;">致电: 4000208888</el-button>
@@ -101,6 +102,9 @@
       }
     });
   },
+    goToSetting(){
+      this.$router.push('/user');
+    },
     goToLogin() {
       this.$router.push({ name: "login" });
     },
