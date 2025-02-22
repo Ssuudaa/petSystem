@@ -201,7 +201,7 @@
     </div>
   </el-form>
 </el-dialog>
-<el-dialog :visible.sync="aboutUsDialogVisible" title="医疗团队模块配置">
+<el-dialog :visible.sync="aboutUsDialogVisible" title="关于我们模块配置">
   <el-form :model="aboutUs" ref="aboutUsForm" label-width="100px">
     
     <!-- 地址 -->
