@@ -219,9 +219,9 @@
       <el-input v-model="aboutUs.address" placeholder="请输入地址"></el-input>
     </el-form-item>
 
-    <!-- 联系方式 -->
+    <!-- 联系方式（改为 contact，与后端一致） -->
     <el-form-item label="联系方式" :rules="[{ required: true, message: '请输入联系方式', trigger: 'blur' }]">
-      <el-input v-model="aboutUs.phone" placeholder="请输入联系方式"></el-input>
+      <el-input v-model="aboutUs.contact" placeholder="请输入联系方式"></el-input>
     </el-form-item>
 
     <!-- 营业时间 -->
@@ -239,9 +239,9 @@
       <el-input v-model="aboutUs.longitude" placeholder="请输入经度"></el-input>
     </el-form-item>
 
-    <!-- 友情链接 -->
+    <!-- 友情链接（改为 url，与后端一致） -->
     <el-form-item label="友情链接" :rules="[{ required: true, message: '请输入友情链接', trigger: 'blur' }]">
-      <el-input v-model="aboutUs.links" placeholder="请输入友情链接"></el-input>
+      <el-input v-model="aboutUs.url" placeholder="请输入友情链接"></el-input>
     </el-form-item>
 
     <div class="dialog-footer" style="text-align: center;">
@@ -251,6 +251,7 @@
 
   </el-form>
 </el-dialog>
+
 
 <el-dialog :visible.sync="petInfoDialogVisible" title="爱宠百科模块配置">
   <el-tabs type="card">
@@ -388,152 +389,46 @@
 
 <el-dialog :visible.sync="teamInfoDialogVisible" title="医疗团队模块配置">
   <el-tabs type="card">
-    <!-- 员工1 -->
-    <el-tab-pane label="员工1">
-      <el-form :model="teamMembers[0]" label-width="100px">
+    <el-tab-pane v-for="(member, index) in teamMembers" :key="index" :label="'员工' + (index + 1)">
+      <el-form :model="member" label-width="100px">
+        <!-- 员工姓名 -->
         <el-form-item label="员工姓名" :rules="[{ required: true, message: '请输入员工姓名', trigger: 'blur' }]">
-          <el-input v-model="teamMembers[0].name" placeholder="请输入员工姓名"></el-input>
+          <el-input v-model="member.name" placeholder="请输入员工姓名"></el-input>
         </el-form-item>
-        <el-form-item label="员工照片" :rules="[{ required: true, message: '请上传员工照片', trigger: 'change' }]">
-          <el-upload
-            class="upload-demo"
-            :action="uploadPath"
-            :on-success="(response, file, fileList) => handleTeamMemberPhotoSuccess(teamMembers[0], response, file, fileList)"
-            :before-upload="beforeUpload"
-          >
-            <el-button slot="trigger" size="small" type="primary">上传图片</el-button>
-          </el-upload>
-        </el-form-item>
-        <el-form-item label="职位" :rules="[{ required: true, message: '请输入员工职位', trigger: 'blur' }]">
-          <el-input v-model="teamMembers[0].role" placeholder="请输入员工职位"></el-input>
-        </el-form-item>
-        <el-form-item label="备注" :rules="[{ required: true, message: '请输入员工备注', trigger: 'blur' }]">
-          <el-input v-model="teamMembers[0].description" placeholder="请输入员工备注"></el-input>
-        </el-form-item>
-      </el-form>
-      <div class="dialog-footer" style="text-align: center; display: flex; justify-content: center; gap: 20px;">
-        <el-button @click="closeDialog(0)">取消</el-button>
-        <el-button type="primary" @click="submitTeamInfo(0)">提交员工1</el-button>
-      </div>
-    </el-tab-pane>
 
-    <!-- 员工2 -->
-    <el-tab-pane label="员工2">
-      <el-form :model="teamMembers[1]" label-width="100px">
-        <el-form-item label="员工姓名" :rules="[{ required: true, message: '请输入员工姓名', trigger: 'blur' }]">
-          <el-input v-model="teamMembers[1].name" placeholder="请输入员工姓名"></el-input>
-        </el-form-item>
+        <!-- 员工照片 -->
         <el-form-item label="员工照片" :rules="[{ required: true, message: '请上传员工照片', trigger: 'change' }]">
           <el-upload
             class="upload-demo"
             :action="uploadPath"
-            :on-success="(response, file, fileList) => handleTeamMemberPhotoSuccess(teamMembers[1], response, file, fileList)"
+            :file-list="member.image ? [{ name: member.name, url: member.image }] : []"
+            :on-success="(response, file, fileList) => handleTeamMemberPhotoSuccess(member, response, file, fileList)"
             :before-upload="beforeUpload"
+            list-type="picture-card"
           >
-            <el-button slot="trigger" size="small" type="primary">上传图片</el-button>
+            <i class="el-icon-plus"></i>
           </el-upload>
         </el-form-item>
-        <el-form-item label="职位" :rules="[{ required: true, message: '请输入员工职位', trigger: 'blur' }]">
-          <el-input v-model="teamMembers[1].role" placeholder="请输入员工职位"></el-input>
-        </el-form-item>
-        <el-form-item label="备注" :rules="[{ required: true, message: '请输入员工备注', trigger: 'blur' }]">
-          <el-input v-model="teamMembers[1].description" placeholder="请输入员工备注"></el-input>
-        </el-form-item>
-      </el-form>
-      <div class="dialog-footer" style="text-align: center; display: flex; justify-content: center; gap: 20px;">
-        <el-button @click="closeDialog(1)">取消</el-button>
-        <el-button type="primary" @click="submitTeamInfo(1)">提交员工2</el-button>
-      </div>
-    </el-tab-pane>
 
-    <!-- 员工3 -->
-    <el-tab-pane label="员工3">
-      <el-form :model="teamMembers[2]" label-width="100px">
-        <el-form-item label="员工姓名" :rules="[{ required: true, message: '请输入员工姓名', trigger: 'blur' }]">
-          <el-input v-model="teamMembers[2].name" placeholder="请输入员工姓名"></el-input>
-        </el-form-item>
-        <el-form-item label="员工照片" :rules="[{ required: true, message: '请上传员工照片', trigger: 'change' }]">
-          <el-upload
-            class="upload-demo"
-            :action="uploadPath"
-            :on-success="(response, file, fileList) => handleTeamMemberPhotoSuccess(teamMembers[2], response, file, fileList)"
-            :before-upload="beforeUpload"
-          >
-            <el-button slot="trigger" size="small" type="primary">上传图片</el-button>
-          </el-upload>
-        </el-form-item>
+        <!-- 职位 -->
         <el-form-item label="职位" :rules="[{ required: true, message: '请输入员工职位', trigger: 'blur' }]">
-          <el-input v-model="teamMembers[2].role" placeholder="请输入员工职位"></el-input>
+          <el-input v-model="member.role" placeholder="请输入员工职位"></el-input>
         </el-form-item>
-        <el-form-item label="备注" :rules="[{ required: true, message: '请输入员工备注', trigger: 'blur' }]">
-          <el-input v-model="teamMembers[2].description" placeholder="请输入员工备注"></el-input>
-        </el-form-item>
-      </el-form>
-      <div class="dialog-footer" style="text-align: center; display: flex; justify-content: center; gap: 20px;">
-        <el-button @click="closeDialog(2)">取消</el-button>
-        <el-button type="primary" @click="submitTeamInfo(2)">提交员工3</el-button>
-      </div>
-    </el-tab-pane>
 
-    <!-- 员工4 -->
-    <el-tab-pane label="员工4">
-      <el-form :model="teamMembers[3]" label-width="100px">
-        <el-form-item label="员工姓名" :rules="[{ required: true, message: '请输入员工姓名', trigger: 'blur' }]">
-          <el-input v-model="teamMembers[3].name" placeholder="请输入员工姓名"></el-input>
-        </el-form-item>
-        <el-form-item label="员工照片" :rules="[{ required: true, message: '请上传员工照片', trigger: 'change' }]">
-          <el-upload
-            class="upload-demo"
-            :action="uploadPath"
-            :on-success="(response, file, fileList) => handleTeamMemberPhotoSuccess(teamMembers[3], response, file, fileList)"
-            :before-upload="beforeUpload"
-          >
-            <el-button slot="trigger" size="small" type="primary">上传图片</el-button>
-          </el-upload>
-        </el-form-item>
-        <el-form-item label="职位" :rules="[{ required: true, message: '请输入员工职位', trigger: 'blur' }]">
-          <el-input v-model="teamMembers[3].role" placeholder="请输入员工职位"></el-input>
-        </el-form-item>
+        <!-- 备注 -->
         <el-form-item label="备注" :rules="[{ required: true, message: '请输入员工备注', trigger: 'blur' }]">
-          <el-input v-model="teamMembers[3].description" placeholder="请输入员工备注"></el-input>
+          <el-input v-model="member.description" placeholder="请输入员工备注"></el-input>
         </el-form-item>
       </el-form>
-      <div class="dialog-footer" style="text-align: center; display: flex; justify-content: center; gap: 20px;">
-        <el-button @click="closeDialog(3)">取消</el-button>
-        <el-button type="primary" @click="submitTeamInfo(3)">提交员工4</el-button>
-      </div>
-    </el-tab-pane>
 
-    <!-- 员工5 -->
-    <el-tab-pane label="员工5">
-      <el-form :model="teamMembers[4]" label-width="100px">
-        <el-form-item label="员工姓名" :rules="[{ required: true, message: '请输入员工姓名', trigger: 'blur' }]">
-          <el-input v-model="teamMembers[4].name" placeholder="请输入员工姓名"></el-input>
-        </el-form-item>
-        <el-form-item label="员工照片" :rules="[{ required: true, message: '请上传员工照片', trigger: 'change' }]">
-          <el-upload
-            class="upload-demo"
-            :action="uploadPath"
-            :on-success="(response, file, fileList) => handleTeamMemberPhotoSuccess(teamMembers[4], response, file, fileList)"
-            :before-upload="beforeUpload"
-          >
-            <el-button slot="trigger" size="small" type="primary">上传图片</el-button>
-          </el-upload>
-        </el-form-item>
-        <el-form-item label="职位" :rules="[{ required: true, message: '请输入员工职位', trigger: 'blur' }]">
-          <el-input v-model="teamMembers[4].role" placeholder="请输入员工职位"></el-input>
-        </el-form-item>
-        <el-form-item label="备注" :rules="[{ required: true, message: '请输入员工备注', trigger: 'blur' }]">
-          <el-input v-model="teamMembers[4].description" placeholder="请输入员工备注"></el-input>
-        </el-form-item>
-      </el-form>
       <div class="dialog-footer" style="text-align: center; display: flex; justify-content: center; gap: 20px;">
-        <el-button @click="closeDialog(4)">取消</el-button>
-        <el-button type="primary" @click="submitTeamInfo(4)">提交员工5</el-button>
+        <el-button @click="closeDialog(index)">取消</el-button>
+        <el-button type="primary" @click="submitTeamInfo(index)">提交员工{{ index + 1 }}</el-button>
       </div>
     </el-tab-pane>
   </el-tabs>
 </el-dialog>
+
 
 
 
@@ -676,12 +571,12 @@ export default {
       petSysDialogFormVisible: false,
       aboutUsDialogVisible: false,
       aboutUs: {
-        address: "",
-        phone: "",
-        businessHours: "",
-        latitude: "",
-        longitude: "",
-        links: "",
+        address: '',
+        contact: '', // 修改字段名，和后端保持一致
+        businessHours: '',
+        latitude: '',
+        longitude: '',
+        url: '' // 修改字段名，和后端保持一致
       },
       fileList1: [],
     fileList2: [],
@@ -753,23 +648,8 @@ handlePicturePreview(file) {
     this.fileList3 = [];
   },
     addAboutUs() {
+      this.fetchAboutUs()
       this.aboutUsDialogVisible = true;
-    },
-    submitAboutUs() {
-      this.$refs.aboutUsForm.validate((valid) => {
-        if (valid) {
-          // 提交数据
-          console.log("提交数据:", this.aboutUs);
-
-          // 这里可以调用接口提交数据，例如：
-          // axios.post("/api/aboutUs", this.aboutUs).then(response => { ... });
-
-          this.$message.success("提交成功！");
-          this.aboutUsDialogVisible = false;
-        } else {
-          this.$message.error("请填写完整的信息！");
-        }
-      });
     },
     addPetInfo() {
       this.getPetCyc(); 
@@ -1174,6 +1054,65 @@ getPetCyc() {
       this.$message.error('请求失败，请检查网络！');
     });
 },
+   fetchAboutUs() {
+      api.get('/admin/getAboutUs')
+        .then(response => {
+          if (response.code === 200) {
+            this.aboutUs = response.data[0] || {};
+          }
+        })
+    },
+
+    // 提交修改
+    submitAboutUs() {
+  this.$refs.aboutUsForm.validate(valid => {
+    if (valid) {
+      // 构造请求数据
+      const requestData = {
+        id: this.aboutUs.id,
+        address: this.aboutUs.address,
+        contact: this.aboutUs.contact,
+        businessHours: this.aboutUs.businessHours,
+        latitude: this.aboutUs.latitude,
+        longitude: this.aboutUs.longitude,
+        url: this.aboutUs.url
+      };
+
+      // 判断是否有 id，选择调用修改接口或新增接口
+      if (this.aboutUs.id) {
+        // 调用修改接口
+        api.put('/admin/editAboutUs', requestData)
+          .then(response => {
+            if (response.code === 200) {
+              this.$message.success('修改成功！');
+              this.aboutUsDialogVisible = false;
+            } else {
+              this.$message.error(response.message || '修改失败！');
+            }
+          })
+          .catch(error => {
+            this.$message.error('提交失败，请检查网络！');
+          });
+      } else {
+        // 调用新增接口
+        api.put('/admin/editAboutUs', requestData)
+          .then(response => {
+            if (response.code === 200) {
+              this.$message.success('新增成功！');
+              this.aboutUsDialogVisible = false;
+            } else {
+              this.$message.error(response.message || '新增失败！');
+            }
+          })
+          .catch(error => {
+            this.$message.error('提交失败，请检查网络！');
+          });
+      }
+    }
+  });
+}
+
+
   },
 };
 </script>

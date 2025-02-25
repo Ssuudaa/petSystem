@@ -19,29 +19,34 @@
 </template>
 
 <script>
+import api from '@/api.js';  // 确保你有一个封装好的 api 服务来处理接口请求
+
 export default {
   name: 'PetInfo',
   data() {
     return {
-      pets: [
-        {
-          name: "小花",
-          image: "/image/pet1.jpeg",
-          description: "小花是一只可爱的玄风鹦鹉，喜欢玩耍，性格活泼。",
-        },
-        {
-          name: "小黑",
-          image: "/image/pet2.jpeg",
-          description: "小黑是一只安静的猫咪，喜欢晒太阳，爱干净。",
-        },
-        {
-          name: "小白",
-          image: "/image/pet3.jpeg",
-          description: "小白是一只聪明的小狗，喜欢在草地上奔跑。",
-        },
-      ],
+      pets: [],
     };
   },
+  mounted() {
+    this.fetchPets();
+  },
+  methods: {
+    // 获取宠物数据
+    fetchPets() {
+      api.get('/admin/getPetCyc')
+        .then(response => {
+          if (response.code === 200) {
+            this.pets = response.data || [];
+          } else {
+            this.$message.error('获取宠物数据失败！');
+          }
+        })
+        .catch(error => {
+          this.$message.error('请求失败，请检查网络！');
+        });
+    }
+  }
 };
 </script>
 
@@ -66,7 +71,6 @@ export default {
   color: #666;
   margin-bottom: 2vw;
   font-weight: bold;
-
 }
 
 .pet-info-section {

@@ -1,7 +1,7 @@
 <template>
   <el-card class="box-card">
     <h3 class="title">关于我们</h3>
-    <p class="description">{{ aboutInfo.description }}</p>
+    <p class="description">致力打造最好的宠物医院，如有不便请联系我们</p>
 
     <el-row gutter="20" class="content-section">
       <!-- 地图 -->
@@ -18,19 +18,18 @@
           <el-col :span="12" class="contact-info">
             <h4>联系我们</h4>
             <div><strong>地址：</strong> {{ aboutInfo.address }}</div>
-            <div><strong>电话：</strong> {{ aboutInfo.phone }}</div>
+            <div><strong>电话：</strong> {{ aboutInfo.contact }}</div>
             <div><strong>营业时间：</strong><br>{{ aboutInfo.businessHours }}</div>
           </el-col>
 
           <!-- 其他链接 -->
           <el-col :span="12" class="links">
-            <h4>友情链接</h4>
-            <ul>
-              <li v-for="(link, index) in aboutInfo.links" :key="index">
-                <a :href="link.url" target="_blank">{{ link.name }}</a>
-              </li>
-            </ul>
-          </el-col>
+  <ul>
+    <li>
+      <a :href="'http://' + aboutInfo.url" target="_blank">友情链接</a>
+    </li>
+  </ul>
+</el-col>
         </el-row>
       </el-col>
     </el-row>
@@ -40,7 +39,7 @@
 <script>
 import { LMap, LTileLayer } from 'vue2-leaflet';
 import 'leaflet/dist/leaflet.css';
-import axios from 'axios';
+import api from '@/api.js';
 
 export default {
   name: 'AboutUs',
@@ -51,15 +50,12 @@ export default {
   data() {
     return {
       aboutInfo: {
-        description: "我们致力于为宠物提供最专业的医疗服务，关爱每一只宠物的健康。",
-        address: "黄边北路588号（工商银行旁）",
-        phone: "4000208888",
-        businessHours: "周一至周五: 08:00 - 18:00\n周六至周日: 09:00 - 15:00",
-        latitude: 37.7749,
-        longitude: -122.4194,
-        links: [
-          { name: "宠物医院", url: "https://localsite.baidu.com/okam/pages/institution/index?categoryLv1=%E5%AE%A0%E7%89%A9%E6%9C%8D%E5%8A%A1&ch=53&city=%E5%B9%BF%E5%B7%9E%E5%B8%82&crd=12611518_2642882&pathSource=okam%2Fpages%2Fhome%2Findex&qid=16419975128735164572&query=%E5%AE%A0%E7%89%A9%E5%8C%BB%E9%99%A2&shopId=21459245&source=51022&srcid=51022&title=%E5%AE%A0%E7%89%A9%E5%8C%BB%E9%99%A2&rank=6" }
-        ]
+        address: "",
+        contact: "",
+        businessHours: "",
+        latitude: "",
+        longitude: "",
+        links: []
       }
     };
   },
@@ -69,8 +65,14 @@ export default {
   methods: {
     async fetchAboutInfo() {
       try {
-        const response = await axios.get('/api/about');
-        this.aboutInfo = response.data;
+        const response = await api.get('/admin/getAboutUs');
+        if (response.code === 200) {
+          this.aboutInfo = response.data[0] || {}; 
+          console.log("Latitude:", this.aboutInfo.latitude);
+      console.log("Longitude:", this.aboutInfo.longitude);// 假设返回的是一个数组，取第一个元素
+        } else {
+          console.error('获取关于我们信息失败:', response.message);
+        }
       } catch (error) {
         console.error('获取关于我们信息失败:', error);
       }
