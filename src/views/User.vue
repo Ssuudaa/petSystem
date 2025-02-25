@@ -411,8 +411,12 @@
           <el-input v-model="teamMembers[0].description" placeholder="请输入员工备注"></el-input>
         </el-form-item>
       </el-form>
+      <div class="dialog-footer" style="text-align: center; display: flex; justify-content: center; gap: 20px;">
+        <el-button @click="closeDialog(0)">取消</el-button>
+        <el-button type="primary" @click="submitTeamInfo(0)">提交员工1</el-button>
+      </div>
     </el-tab-pane>
-    
+
     <!-- 员工2 -->
     <el-tab-pane label="员工2">
       <el-form :model="teamMembers[1]" label-width="100px">
@@ -436,8 +440,12 @@
           <el-input v-model="teamMembers[1].description" placeholder="请输入员工备注"></el-input>
         </el-form-item>
       </el-form>
+      <div class="dialog-footer" style="text-align: center; display: flex; justify-content: center; gap: 20px;">
+        <el-button @click="closeDialog(1)">取消</el-button>
+        <el-button type="primary" @click="submitTeamInfo(1)">提交员工2</el-button>
+      </div>
     </el-tab-pane>
-    
+
     <!-- 员工3 -->
     <el-tab-pane label="员工3">
       <el-form :model="teamMembers[2]" label-width="100px">
@@ -461,8 +469,12 @@
           <el-input v-model="teamMembers[2].description" placeholder="请输入员工备注"></el-input>
         </el-form-item>
       </el-form>
+      <div class="dialog-footer" style="text-align: center; display: flex; justify-content: center; gap: 20px;">
+        <el-button @click="closeDialog(2)">取消</el-button>
+        <el-button type="primary" @click="submitTeamInfo(2)">提交员工3</el-button>
+      </div>
     </el-tab-pane>
-    
+
     <!-- 员工4 -->
     <el-tab-pane label="员工4">
       <el-form :model="teamMembers[3]" label-width="100px">
@@ -486,8 +498,12 @@
           <el-input v-model="teamMembers[3].description" placeholder="请输入员工备注"></el-input>
         </el-form-item>
       </el-form>
+      <div class="dialog-footer" style="text-align: center; display: flex; justify-content: center; gap: 20px;">
+        <el-button @click="closeDialog(3)">取消</el-button>
+        <el-button type="primary" @click="submitTeamInfo(3)">提交员工4</el-button>
+      </div>
     </el-tab-pane>
-    
+
     <!-- 员工5 -->
     <el-tab-pane label="员工5">
       <el-form :model="teamMembers[4]" label-width="100px">
@@ -511,14 +527,14 @@
           <el-input v-model="teamMembers[4].description" placeholder="请输入员工备注"></el-input>
         </el-form-item>
       </el-form>
+      <div class="dialog-footer" style="text-align: center; display: flex; justify-content: center; gap: 20px;">
+        <el-button @click="closeDialog(4)">取消</el-button>
+        <el-button type="primary" @click="submitTeamInfo(4)">提交员工5</el-button>
+      </div>
     </el-tab-pane>
   </el-tabs>
-
-  <div class="dialog-footer" style="text-align: center;">
-    <el-button @click="teamInfoDialogVisible = false">取消</el-button>
-    <el-button type="primary" @click="submitTeamInfo">确定</el-button>
-  </div>
 </el-dialog>
+
 
 
 
@@ -651,11 +667,12 @@ export default {
       uploadPetSuccess3: false, // 控制轮播图3上传按钮状态
       teamInfoDialogVisible: false, // 控制对话框显示
       teamMembers: [
-        { name: '', image: '', role: '', description: '' },
-        { name: '', image: '', role: '', description: '' },
-        { name: '', image: '', role: '', description: '' },
-        { name: '', image: '', role: '', description: '' },
-        { name: '', image: '', role: '', description: '' }],
+      { id: null, name: '', role: '', image: '', description: '' },
+      { id: null, name: '', role: '', image: '', description: '' },
+      { id: null, name: '', role: '', image: '', description: '' },
+      { id: null, name: '', role: '', image: '', description: '' },
+      { id: null, name: '', role: '', image: '', description: '' }
+    ],
       petSysDialogFormVisible: false,
       aboutUsDialogVisible: false,
       aboutUs: {
@@ -791,6 +808,17 @@ handlePicturePreview(file) {
       _this.pagination.currentPage = 1;
       _this.fetchUserList();
     },
+    closeDialog(index) {
+    // 清除该员工的数据
+    this.teamMembers[index] = {
+      name: '',
+      image: '',
+      role: '',
+      description: ''
+    };
+    // 取消对话框
+    this.teamInfoDialogVisible = false;
+  },
     handleSearch() {
       // 构建查询条件对象
       const searchParams = {
@@ -863,11 +891,12 @@ handlePicturePreview(file) {
     },
     // 打开医疗团队模块配置对话框
     addTeamInfo() {
+      this.fetchStaffData();
       this.teamInfoDialogVisible = true;
     },
     // 上传照片成功的处理函数
     handleTeamMemberPhotoSuccess(member, response, file, fileList) {
-      member.image = response.url;
+      member.image = response.msg;
     },
     // 上传之前的钩子函数，可以用来验证文件大小等
     beforeUpload(file) {
@@ -885,7 +914,7 @@ handlePicturePreview(file) {
     submitTeamInfo() {
       // 这里可以做提交请求的操作
       console.log('提交数据:', this.teamMembers);
-      // 提交后关闭对话框
+      // 提交后取消对话框
       this.teamInfoDialogVisible = false;
     },
   getHospitalInfo() {
@@ -1069,7 +1098,7 @@ handlePicturePreview(file) {
       .then(response => {
         if (response.code === 200) {
           this.$message.success(`${pet} 更新成功`);
-          this.petInfoDialogVisible = false; // 关闭弹窗
+          this.petInfoDialogVisible = false; // 取消弹窗
         } else {
           this.$message.error(`${pet} 更新失败`);
         }
@@ -1097,6 +1126,54 @@ getPetCyc() {
         this.$message.error('请求失败');
       });
   },
+  submitTeamInfo(index) {
+    const staff = this.teamMembers[index];
+    if (!staff.name || !staff.role || !staff.description) {
+      this.$message.error("请填写完整的员工信息！");
+      return;
+    }
+
+    // 组织员工数据
+    const staffData = {
+      id: staff.id,          // 如果是编辑已有员工，传递员工的 ID
+      name: staff.name,
+      role: staff.role,
+      image: staff.image,     // 这里假设员工照片数据已经处理好
+      description: staff.description
+    };
+
+    // 调用后端接口
+    api.put('/admin/editStaff', staffData)
+      .then(response => {
+        if (response.code === 200) {
+          this.$message.success('员工信息更新成功！');
+          this.closeDialog(index);  // 关闭对话框
+        } else {
+          this.$message.error('更新员工信息失败，请重试！');
+        }
+      })
+      .catch(error => {
+        this.$message.error('请求失败，请检查网络！');
+      });
+  },
+  fetchStaffData() {
+  api.get('/admin/getStaff')
+    .then(response => {
+      if (response.code === 200) {
+        let data = response.data || []; // 确保 data 不为空
+        this.teamMembers = Array.from({ length: 5 }, (_, i) => data[i] || { 
+          id: null, // 这里可以是 null 或者不写
+          name: '', 
+          role: '', 
+          image: '', 
+          description: '' 
+        });
+      }
+    })
+    .catch(error => {
+      this.$message.error('请求失败，请检查网络！');
+    });
+},
   },
 };
 </script>
