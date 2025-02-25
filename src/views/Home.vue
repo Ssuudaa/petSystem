@@ -18,7 +18,7 @@
 </el-menu>
   
           <!-- 右上角 登录/注册 按钮 -->
-          <el-button @click="goToSetting"  type="success" round>配置管理</el-button>
+          <el-button @click="goToSetting"  type="success" v-if="isAdmin" round>配置管理</el-button>
           <el-button @click="goToLogin"   type="primary" round v-if="!isLoggedIn">登录/注册</el-button>
           <el-button v-else @click="logout" round>退出</el-button>
           <el-button @click="1"  type="danger" round style="margin-right:50px ;">致电: 4000208888</el-button>
@@ -33,9 +33,7 @@
         <el-col :span="24" :md="8" id="hospital" class="hospital">
           <el-card class="box-card">
             <h2>医院介绍</h2>
-            <p>
-              欢迎来到XXX宠物医院！我们致力于为各种宠物提供专业的医疗和护理服务，无论是犬猫、鸟类、兔子还是爬行动物，我们都能提供贴心的健康保障。我们的团队由资深兽医和护理专家组成，结合先进的医疗设备和个性化的宠物管理方案，确保每一只宠物都能得到细致入微的照顾，帮助它们过上健康、快乐的生活。
-            </p>
+              <p>{{ hospitalDescription }}</p> <!-- 动态显示医院介绍 -->
           </el-card>
         </el-col>
       </el-row>
@@ -66,6 +64,8 @@
   import TeamSection from "@/components/TeamSection.vue";
   import AboutUs from "@/components/AboutUs.vue";
   import TeamCarousel from "@/components/TeamCarousel.vue";
+  import api from '@/api.js';
+
 
   
   export default {
@@ -74,19 +74,30 @@
       PetInfo,
       TeamSection,
       AboutUs,
-      TeamCarousel
+      TeamCarousel,
     },
     data() {
       return {
         activeMenu: "home",
         isLoggedIn: false, // 默认选中的菜单项
+        isAdmin:false,
+        hospitalDescription: '',
       };
     },
+    mounted() {
+    // 在这里监听子组件的 updateUserRole 事件
+    this.$on('updateUserRole', this.updateUserRole);
+    this.fetchHospitalInfo();
+  },
     created() {
     // 页面加载时读取登录状态
     const status = localStorage.getItem('isLoggedIn');
-    if (status === 'true') {
-      this.isLoggedIn = true;
+  if (status === 'true') {
+    this.isLoggedIn = true;
+      }
+    const role = localStorage.getItem('userRole');
+    if (role == 1) {
+      this.isAdmin = true;  // 设置为管理员
     }
   },
   methods: {
@@ -110,7 +121,9 @@
     },
     logout() {
       this.isLoggedIn = false; // 退出时设置为未登录
-      localStorage.setItem('isLoggedIn', 'false'); // 清除登录状态
+      this.isAdmin = false;
+      localStorage.setItem('isLoggedIn', 'false'); 
+      localStorage.removeItem('userRole');// 清除登录状态
       const loading = this.$loading({
             lock: true,
             text: '正在退出...',
@@ -124,6 +137,23 @@
     updateLoginStatus(status) {
       this.isLoggedIn = status; // 更新登录状态
       localStorage.setItem('isLoggedIn', status.toString()); // 存储登录状态
+    },
+    updateUserRole(role) {
+      this.isAdmin = (role === 1);
+      console.log('更新的用户角色:', role); // 打印出更新的角色，确保数据传递成功
+    },
+    async fetchHospitalInfo() {
+      try {
+        const response = await api.get('/admin/getHospital/1');
+        // 调用 API 获取医院介绍
+        if (response.code === 200) {
+          this.hospitalDescription = response.data.description
+           || '医院介绍加载失败，请稍后再试。'; // 设置医院介绍内容
+        }
+      } catch (error) {
+        console.error('获取医院介绍失败:', error);
+        this.hospitalDescription = '获取医院介绍失败，请稍后再试。'; // 出错时显示提示信息
+      }
     },
   },
   };
@@ -168,6 +198,12 @@
   justify-content: space-between;
   align-items: center;
   padding-left: 100px; /* 给 logo 留出空间 */
+}
+
+.hospital h2 {
+  text-align: center; /* 水平居中 */
+  margin: 0; /* 去掉默认的上下外边距 */
+  padding: 20px 0; /* 可选：根据需要调整上下内边距 */
 }
 
 /* 使页面内容不被固定的导航栏覆盖 */

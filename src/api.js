@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080/petHospital', // 后端地址
+  baseURL: 'http://localhost:8080', // 后端地址
   timeout: 5000 // 请求超时
 });
 

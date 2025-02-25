@@ -10,7 +10,7 @@
       </div>
     </el-header>
     <el-main>
-      <div v-if="roleStatus">
+      <div>
         姓名:
         <el-input
           style="width: 170px; margin-left: 10px"
@@ -23,7 +23,7 @@
           style="width: 170px; margin-left: 10px"
           placeholder="请输入"
           clearable
-          v-model="userAccountValue"
+          v-model="phoneValue"
         ></el-input>
         角色:
         <el-select
@@ -33,10 +33,10 @@
           v-model="roleValue"
         >
           <el-option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.value"
-            :value="item.value"
+          v-for="item in options"
+        :key="item.value"
+        :label="item.label"
+        :value="item.value"
           ></el-option>
         </el-select>
 
@@ -72,8 +72,14 @@
 
   <!-- 姓名列 -->
   <el-table-column
+    label="姓名"
+    prop="name"
+    width="100"
+    align="center"
+  />
+  <el-table-column
     label="手机号"
-    prop="dataPhone"
+    prop="phone"
     width="200"
     align="center"
   />
@@ -81,24 +87,28 @@
   <!-- 性别列 -->
   <el-table-column
     label="性别"
-    prop="dataSex"
-    width="200"
+    prop="sex"
+    width="100"
     align="center"
   />
 
   <!-- 密码列 -->
   <el-table-column
     label="密码"
-    prop="dataPassword"
+    prop="password"
     width="200"
     align="center"
   />
   <el-table-column
-    label="角色"
-    prop="dataRole"
-    width="200"
-    align="center"
-  />
+  label="角色"
+  prop="role"
+  width="100"
+  align="center">
+  <template slot-scope="scope">
+    <!-- 根据 role 的值动态显示角色 -->
+    {{ scope.row.role === 1 ? '管理员' : '用户' }}
+  </template>
+</el-table-column>
           <el-table-column label="操作" min-width="100" align="center">
             <template slot-scope="scope">
               <el-button
@@ -122,7 +132,6 @@
                 type="danger"
                 round
                 @click="openDelete(scope.row)"
-                v-if="roleStatus"
                 >删除</el-button
               >
             </template>
@@ -144,56 +153,57 @@
       <el-dialog :visible.sync="petSysDialogFormVisible" :title="dialogtitle">
   <el-form :model="petsys" ref="form" label-width="100px">
     <!-- 轮播图 1 -->
-    <el-form-item label="轮播图 1" :rules="[{ required: true, message: '请上传轮播图1', trigger: 'change' }]">
-      <el-upload
-        class="upload-demo"
-        action="/upload"   
-        :on-success="handleSuccess1"
-        :before-upload="beforeUpload"
-        :show-file-list="false"
-      >
-        <el-button>点击上传图片</el-button>
-      </el-upload>
-      <el-input v-model="petsys.carousel1Caption" placeholder="请输入轮播图1的描述" :rules="[{ required: true, message: '请输入轮播图1描述', trigger: 'blur' }]"></el-input>
-    </el-form-item>
-    
-    <!-- 轮播图 2 -->
-    <el-form-item label="轮播图 2" :rules="[{ required: true, message: '请上传轮播图2', trigger: 'change' }]">
-      <el-upload
-        class="upload-demo"
-        action="/upload"   
-        :on-success="handleSuccess2"
-        :before-upload="beforeUpload"
-        :show-file-list="false"
-      >
-        <el-button>点击上传图片</el-button>
-      </el-upload>
-      <el-input v-model="petsys.carousel2Caption" placeholder="请输入轮播图2的描述" :rules="[{ required: true, message: '请输入轮播图2描述', trigger: 'blur' }]"></el-input>
-    </el-form-item>
+    <el-form-item label="轮播图 1">
+    <el-upload
+      class="upload-demo"
+      :action="uploadPath"
+      :on-success="handleSuccess1"
+      :file-list="fileList1"
+      list-type="picture-card"
+      :limit="1"
+      :on-remove="handleRemove1"
+       accept="image/*"
+    >
+      <el-button v-if="fileList1.length === 0">{{ uploadText1 }}</el-button>
+    </el-upload>
+  </el-form-item>
 
-    <!-- 轮播图 3 -->
-    <el-form-item label="轮播图 3" :rules="[{ required: true, message: '请上传轮播图3', trigger: 'change' }]">
-      <el-upload
-        class="upload-demo"
-        action="/upload"
-        :on-success="handleSuccess3"
-        :before-upload="beforeUpload"
-        :show-file-list="false"
-      >
-        <el-button>点击上传图片</el-button>
-      </el-upload>
-      <el-input v-model="petsys.carousel3Caption" placeholder="请输入轮播图3的描述" :rules="[{ required: true, message: '请输入轮播图3描述', trigger: 'blur' }]"></el-input>
-    </el-form-item>
+  <!-- 轮播图 2 -->
+  <el-form-item label="轮播图 2">
+    <el-upload
+      class="upload-demo"
+      :action="uploadPath"
+      :on-success="handleSuccess2"
+      :file-list="fileList2"
+      list-type="picture-card"
+      :limit="1"
+      :on-remove="handleRemove2"
+       accept="image/*"
+    >
+      <el-button v-if="fileList2.length === 0">{{ uploadText2 }}</el-button>
+    </el-upload>
+  </el-form-item>
 
-    <!-- 介绍标题 -->
-    <!-- <el-form-item label="介绍标题" :rules="[{ required: true, message: '请输入介绍标题', trigger: 'blur' }]">
-      <el-input v-model="petsys.title" placeholder="请输入介绍标题"></el-input>
-    </el-form-item> -->
+  <!-- 轮播图 3 -->
+  <el-form-item label="轮播图 3">
+    <el-upload
+      class="upload-demo"
+      :action="uploadPath"
+      :on-success="handleSuccess3"
+      :file-list="fileList3"
+      list-type="picture-card"
+      :limit="1"
+      :on-remove="handleRemove3"
+       accept="image/*"
+    >
+      <el-button v-if="fileList3.length === 0">{{ uploadText3 }}</el-button>
+    </el-upload>
+  </el-form-item>
 
-    <!-- 介绍内容 -->
-    <el-form-item label="介绍内容" :rules="[{ required: true, message: '请输入介绍内容', trigger: 'blur' }]">
-      <el-input v-model="petsys.content" type="textarea" placeholder="请输入介绍内容"></el-input>
-    </el-form-item>
+  <!-- 介绍内容 -->
+  <el-form-item label="介绍内容">
+    <el-input v-model="petsys.description" type="textarea" placeholder="请输入介绍内容"></el-input>
+  </el-form-item> 
 
     <div class="dialog-footer" style="text-align: center;">
       <el-button @click="petSyScancel">取消</el-button>
@@ -242,35 +252,52 @@
   </el-form>
 </el-dialog>
 
-      <el-dialog :visible.sync="petInfoDialogVisible" title="爱宠百科模块配置">
+<el-dialog :visible.sync="petInfoDialogVisible" title="爱宠百科模块配置">
   <el-tabs type="card">
     <!-- 宠物1 -->
     <el-tab-pane label="宠物1">
-      <el-form :model="pet1" label-width="100px">
+      <el-form :model="pet1" ref="pet1Form" label-width="100px">
         <el-form-item label="宠物1姓名" :rules="[{ required: true, message: '请输入宠物1姓名', trigger: 'blur' }]">
           <el-input v-model="pet1.name" placeholder="请输入宠物1姓名"></el-input>
         </el-form-item>
-        
+
         <el-form-item label="宠物1照片" :rules="[{ required: true, message: '请上传宠物1照片', trigger: 'change' }]">
           <el-upload
             class="upload-demo"
-            action="/upload"
+            :action="uploadPath"
             :on-success="(response, file, fileList) => handlePetPhotoSuccess(pet1, response, file, fileList)"
             :before-upload="beforeUpload"
+            :file-list="pet1.fileList"
+            list-type="picture-card"
+            :limit="1"
+            accept="image/*"
           >
             <el-button slot="trigger" size="small" type="primary">上传图片</el-button>
           </el-upload>
+          <!-- 回显图片 -->
+          <el-image
+            v-if="pet1.image"
+            :src="pet1.image"
+            style="width: 100px; height: 100px; margin-top: 10px;"
+            fit="cover"
+          />
         </el-form-item>
 
         <el-form-item label="宠物1描述" :rules="[{ required: true, message: '请输入宠物1描述', trigger: 'blur' }]">
           <el-input v-model="pet1.description" placeholder="请输入宠物1描述"></el-input>
         </el-form-item>
+
+        <!-- 提交按钮和取消按钮 -->
+        <div class="dialog-footer" style="text-align: center; display: flex; justify-content: center; gap: 20px;">
+          <el-button @click="petInfoDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitPetInfo('pet1')">提交宠物1</el-button>
+        </div>
       </el-form>
     </el-tab-pane>
 
     <!-- 宠物2 -->
     <el-tab-pane label="宠物2">
-      <el-form :model="pet2" label-width="100px">
+      <el-form :model="pet2" ref="pet2Form" label-width="100px">
         <el-form-item label="宠物2姓名" :rules="[{ required: true, message: '请输入宠物2姓名', trigger: 'blur' }]">
           <el-input v-model="pet2.name" placeholder="请输入宠物2姓名"></el-input>
         </el-form-item>
@@ -278,23 +305,40 @@
         <el-form-item label="宠物2照片" :rules="[{ required: true, message: '请上传宠物2照片', trigger: 'change' }]">
           <el-upload
             class="upload-demo"
-            action="/upload"
+            :action="uploadPath"
             :on-success="(response, file, fileList) => handlePetPhotoSuccess(pet2, response, file, fileList)"
             :before-upload="beforeUpload"
+            :file-list="pet2.fileList"
+            list-type="picture-card"
+            :limit="1"
+            accept="image/*"
           >
             <el-button slot="trigger" size="small" type="primary">上传图片</el-button>
           </el-upload>
+          <!-- 回显图片 -->
+          <el-image
+            v-if="pet2.image"
+            :src="pet2.image"
+            style="width: 100px; height: 100px; margin-top: 10px;"
+            fit="cover"
+          />
         </el-form-item>
 
         <el-form-item label="宠物2描述" :rules="[{ required: true, message: '请输入宠物2描述', trigger: 'blur' }]">
           <el-input v-model="pet2.description" placeholder="请输入宠物2描述"></el-input>
         </el-form-item>
+
+        <!-- 提交按钮和取消按钮 -->
+        <div class="dialog-footer" style="text-align: center; display: flex; justify-content: center; gap: 20px;">
+          <el-button @click="petInfoDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitPetInfo('pet2')">提交宠物2</el-button>
+        </div>
       </el-form>
     </el-tab-pane>
 
     <!-- 宠物3 -->
     <el-tab-pane label="宠物3">
-      <el-form :model="pet3" label-width="100px">
+      <el-form :model="pet3" ref="pet3Form" label-width="100px">
         <el-form-item label="宠物3姓名" :rules="[{ required: true, message: '请输入宠物3姓名', trigger: 'blur' }]">
           <el-input v-model="pet3.name" placeholder="请输入宠物3姓名"></el-input>
         </el-form-item>
@@ -302,26 +346,44 @@
         <el-form-item label="宠物3照片" :rules="[{ required: true, message: '请上传宠物3照片', trigger: 'change' }]">
           <el-upload
             class="upload-demo"
-            action="/upload"
+            :action="uploadPath"
             :on-success="(response, file, fileList) => handlePetPhotoSuccess(pet3, response, file, fileList)"
             :before-upload="beforeUpload"
+            :file-list="pet3.fileList"
+            list-type="picture-card"
+            :limit="1"
+            accept="image/*"
           >
             <el-button slot="trigger" size="small" type="primary">上传图片</el-button>
           </el-upload>
+          <!-- 回显图片 -->
+          <el-image
+            v-if="pet3.image"
+            :src="pet3.image"
+            style="width: 100px; height: 100px; margin-top: 10px;"
+            fit="cover"
+          />
         </el-form-item>
 
         <el-form-item label="宠物3描述" :rules="[{ required: true, message: '请输入宠物3描述', trigger: 'blur' }]">
           <el-input v-model="pet3.description" placeholder="请输入宠物3描述"></el-input>
         </el-form-item>
+
+        <!-- 提交按钮和取消按钮 -->
+        <div class="dialog-footer" style="text-align: center; display: flex; justify-content: center; gap: 20px;">
+          <el-button @click="petInfoDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitPetInfo('pet3')">提交宠物3</el-button>
+        </div>
       </el-form>
     </el-tab-pane>
   </el-tabs>
-
-  <div class="dialog-footer" style="text-align: center;">
-    <el-button @click="petInfoDialogVisible = false">取消</el-button>
-    <el-button type="primary" @click="submitPetInfo">确定</el-button>
-  </div>
 </el-dialog>
+
+
+
+
+
+
 
 
 <el-dialog :visible.sync="teamInfoDialogVisible" title="医疗团队模块配置">
@@ -335,7 +397,7 @@
         <el-form-item label="员工照片" :rules="[{ required: true, message: '请上传员工照片', trigger: 'change' }]">
           <el-upload
             class="upload-demo"
-            action="/upload"
+            :action="uploadPath"
             :on-success="(response, file, fileList) => handleTeamMemberPhotoSuccess(teamMembers[0], response, file, fileList)"
             :before-upload="beforeUpload"
           >
@@ -360,7 +422,7 @@
         <el-form-item label="员工照片" :rules="[{ required: true, message: '请上传员工照片', trigger: 'change' }]">
           <el-upload
             class="upload-demo"
-            action="/upload"
+            :action="uploadPath"
             :on-success="(response, file, fileList) => handleTeamMemberPhotoSuccess(teamMembers[1], response, file, fileList)"
             :before-upload="beforeUpload"
           >
@@ -385,7 +447,7 @@
         <el-form-item label="员工照片" :rules="[{ required: true, message: '请上传员工照片', trigger: 'change' }]">
           <el-upload
             class="upload-demo"
-            action="/upload"
+            :action="uploadPath"
             :on-success="(response, file, fileList) => handleTeamMemberPhotoSuccess(teamMembers[2], response, file, fileList)"
             :before-upload="beforeUpload"
           >
@@ -410,7 +472,7 @@
         <el-form-item label="员工照片" :rules="[{ required: true, message: '请上传员工照片', trigger: 'change' }]">
           <el-upload
             class="upload-demo"
-            action="/upload"
+            :action="uploadPath"
             :on-success="(response, file, fileList) => handleTeamMemberPhotoSuccess(teamMembers[3], response, file, fileList)"
             :before-upload="beforeUpload"
           >
@@ -435,7 +497,7 @@
         <el-form-item label="员工照片" :rules="[{ required: true, message: '请上传员工照片', trigger: 'change' }]">
           <el-upload
             class="upload-demo"
-            action="/upload"
+            :action="uploadPath"
             :on-success="(response, file, fileList) => handleTeamMemberPhotoSuccess(teamMembers[4], response, file, fileList)"
             :before-upload="beforeUpload"
           >
@@ -461,36 +523,44 @@
 
 
 
-      <el-dialog
-        :title="dialogtitle"
-        :visible.sync="dialogFormVisible"
-        width="30%"
-        height="10%"
-        center
+<el-dialog
+  :title="dialogtitle"
+  :visible.sync="dialogFormVisible"
+  width="30%"
+  height="40%"
+  center
+>
+  <el-form>
+    <el-form-item label="姓 名:" style="text-align: center;">
+      <el-input
+        v-model="tableData.name"
+        style="width: 63%; margin-left: 5px;"
+        autocomplete="off"
+      ></el-input>
+    </el-form-item>
+    <el-form-item label="手机号:" style="text-align: center;">
+      <el-input
+        v-model="tableData.phone"
+        style="width: 63%; margin: 0 auto;"
+        autocomplete="off"
+      ></el-input>
+    </el-form-item>
+    <el-form-item label="性 别:" style="text-align: center;">
+      <el-select
+        v-model="tableData.sex"
+        style="width: 63%; margin-left: 5px;"
+        placeholder="请选择性别"
       >
-        <el-form>
-          <el-form-item label="手机号:">
-            <el-input
-              v-model="tableData.dataPhone"
-              style="width: 63%"
-              autocomplete="off"
-            ></el-input>
-          </el-form-item>
-          <el-form-item label=" 性 别 ：  ">
-            <el-input
-              v-model="tableData.sex"
-              style="width: 63%"
-              autocomplete="off"
-            ></el-input>
-          </el-form-item>
-        </el-form>
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="cancel">取 消</el-button>
-          <el-button type="primary" @click="submittype()"
-            >确 定</el-button
-          >
-        </div>
-      </el-dialog>
+        <el-option label="男" value="男"></el-option>
+        <el-option label="女" value="女"></el-option>
+      </el-select>
+    </el-form-item>
+  </el-form>
+  <div slot="footer" class="dialog-footer">
+    <el-button @click="editUserCancel()">取 消</el-button>
+    <el-button type="primary" @click="submitEditUser()">确 定</el-button>
+  </div>
+</el-dialog>
       <el-dialog
         title="修改密码"
         :visible.sync="passwordVisiable"
@@ -526,61 +596,66 @@
 </template>
 
 <script>
+import api from '@/api.js';
+
 export default {
   // name: "home",
   data() {
     return {
+      nameValue:"",
+      phoneValue:"",
+      roleValue:"",
+      uploadPath: 'http://localhost:8080/admin/upload',
       dataPhone:"",
       dataSex:"",
       dataPassword:"",
       dataRole:"",
       sysuser: {},
-      tableData: [
-      
-        {
-          dataPhone: "13800138000",
-          dataSex: "男",
-          dataPassword: "123456",
-          dataRole: "管理员",
-        },
-      ],
+      tableData: [],
       pagination: {
         currentPage: 1,
-        pageSizes: [10, 50, 100, 200, 1000],
+        pageSizes: [10, 50, 100, 200],
         pageSize: 10,
         total: 0,
       },
-      petsys: {
-        carousel1Src: "",
-        carousel1Caption: "",
-        carousel2Src: "",
-        carousel2Caption: "",
-        carousel3Src: "",
-        carousel3Caption: "",
-      },
+      hospitalId: null,  // 用来区分是新增还是编辑
+    petsys: {
+      id: "",
+      name: "",
+      description: "",
+      imageOne: "",
+      imageTwo: "",
+      imageThree: ""
+    },
       petInfoDialogVisible: false, // 控制对话框显示
       pet1: {
         name: '', // 宠物1姓名
-        photoSrc: '', // 宠物1照片的图片链接
+        image: '', // 宠物1照片的图片链接
         description: '', // 宠物1描述
       },
       pet2: {
         name: '', // 宠物2姓名
-        photoSrc: '', // 宠物2照片的图片链接
+        image: '', // 宠物2照片的图片链接
         description: '', // 宠物2描述
       },
       pet3: {
         name: '', // 宠物3姓名
-        photoSrc: '', // 宠物3照片的图片链接
+        image: '', // 宠物3照片的图片链接
         description: '', // 宠物3描述
       },
+      uploadSuccess1: false, // 控制轮播图1上传按钮状态
+      uploadSuccess2: false, // 控制轮播图2上传按钮状态
+      uploadSuccess3: false, // 控制轮播图3上传按钮状态
+      uploadPetSuccess1: false, // 控制轮播图1上传按钮状态
+      uploadPetSuccess2: false, // 控制轮播图2上传按钮状态
+      uploadPetSuccess3: false, // 控制轮播图3上传按钮状态
       teamInfoDialogVisible: false, // 控制对话框显示
       teamMembers: [
-        { name: '', photoSrc: '', role: '', description: '' },
-        { name: '', photoSrc: '', role: '', description: '' },
-        { name: '', photoSrc: '', role: '', description: '' },
-        { name: '', photoSrc: '', role: '', description: '' },
-        { name: '', photoSrc: '', role: '', description: '' }],
+        { name: '', image: '', role: '', description: '' },
+        { name: '', image: '', role: '', description: '' },
+        { name: '', image: '', role: '', description: '' },
+        { name: '', image: '', role: '', description: '' },
+        { name: '', image: '', role: '', description: '' }],
       petSysDialogFormVisible: false,
       aboutUsDialogVisible: false,
       aboutUs: {
@@ -591,9 +666,9 @@ export default {
         longitude: "",
         links: "",
       },
-      nameValue: "",
-      depNameValue: "",
-      userAccountValue: "",
+      fileList1: [],
+    fileList2: [],
+    fileList3: [],
       height: "calc(120vh - 368px)",
       userId: "",
       dialogtitle: "",
@@ -605,34 +680,61 @@ export default {
       userName: "",
       userAccount: "",
       role: "",
-      roleValue: "管理员",
       roleStatus: true,
       options: [
-        {
-          value: "用户",
-        },
-        {
-          value: "管理员",
-        },
-      ],
+        { value: 0, label: "用户" },
+        { value: 1, label: "管理员" }
+      ]
     };
   },
   created() {
-    if (this.$route.query.id) {
-      this.userId = this.$route.query.id;
-    }
-    let userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    this.userName = userInfo.userName;
-    this.userAccount = userInfo.userAccount;
-    this.role = userInfo.role;
-    if (userInfo.role == "学生") {
-      this.roleStatus = false;
-      this.roleValue='学生'
-      this.height = "calc(135vh - 368px)";
-    }
-    this.getUserList();
+  console.log("created 钩子函数被调用");
+  this.fetchUserList();
+  this.getHospitalInfo();
+ },
+ computed: {
+  uploadText1() {
+    return this.petsys.imageOne ? "已上传" : "点击上传图片";
   },
+  uploadText2() {
+    return this.petsys.imageTwo ? "已上传" : "点击上传图片";
+  },
+  uploadText3() {
+    return this.petsys.imageThree ? "已上传" : "点击上传图片";
+  },
+},
   methods: {
+    handleSuccess1(response, file, fileList) {
+  this.petsys.imageOne = response.msg;  // 保存上传图片路径到imageOne字段
+  this.uploadSuccess1 = true;
+},
+
+handleSuccess2(response, file, fileList) {
+  this.petsys.imageTwo = response.msg;  // 保存上传图片路径到imageTwo字段
+  this.uploadSuccess2 = true;
+},
+
+handleSuccess3(response, file, fileList) {
+  this.petsys.imageThree = response.msg;  // 保存上传图片路径到imageThree字段
+  this.uploadSuccess3 = true;
+},
+handlePicturePreview(file) {
+    this.dialogImageUrl = file.url;
+    this.dialogVisible = true;
+  },
+  // 删除图片
+  handleRemove1() {
+    this.petsys.imageOne = "";
+    this.fileList1 = [];
+  },
+  handleRemove2() {
+    this.petsys.imageTwo = "";
+    this.fileList2 = [];
+  },
+  handleRemove3() {
+    this.petsys.imageThree = "";
+    this.fileList3 = [];
+  },
     addAboutUs() {
       this.aboutUsDialogVisible = true;
     },
@@ -653,11 +755,12 @@ export default {
       });
     },
     addPetInfo() {
+      this.getPetCyc(); 
       this.petInfoDialogVisible = true;
     },
     // 上传照片成功的处理函数
     handlePetPhotoSuccess(pet, response, file, fileList) {
-      pet.photoSrc = response.url;
+      pet.image = response.msg;
     },
     // 上传之前的钩子函数，可以用来验证文件大小等
     beforeUpload(file) {
@@ -672,12 +775,6 @@ export default {
       return isImage && isLt2M;
     },
     // 提交表单数据
-    submitPetInfo() {
-      // 这里可以做提交请求的操作
-      console.log('提交数据:', { pet1: this.pet1, pet2: this.pet2, pet3: this.pet3 });
-      // 提交后关闭对话框
-      this.petInfoDialogVisible = false;
-    },
     goHome() {
       this.$router.push('/');
     },
@@ -689,14 +786,33 @@ export default {
     reset() {
       const _this = this;
       _this.nameValue = "";
-      _this.depNameValue = "";
-      _this.userAccountValue = "";
+      _this.phoneValue = "";
+      _this.roleValue ="";
       _this.pagination.currentPage = 1;
-      _this.getUserList();
+      _this.fetchUserList();
     },
     handleSearch() {
-      this.pagination.currentPage = 1;
-      this.getUserList();
+      // 构建查询条件对象
+      const searchParams = {
+        name: this.nameValue,
+        phone: this.phoneValue,
+        role: this.roleValue
+      };
+
+      // 调用后端API获取数据
+      this.fetchData(searchParams);
+    },
+    // 请求后端接口获取数据
+    fetchData(queryParams) {
+      const queryString = new URLSearchParams(queryParams).toString();
+      api.get(`/admin/getUser?${queryString}`).then((response) => {
+        if (response.code === 200) {
+          // 假设返回的数据是tableData
+          this.tableData = response.rows;  // 更新表格数据
+        } else {
+          this.$message.error('查询失败');
+        }
+      });
     },
     sizeChange(val) {
       const _this = this;
@@ -716,20 +832,19 @@ export default {
       this.dialogFormVisible = true;
       this.dialogtitle = "新增信息";
     },
-    cancel() {
+    editUserCancel() {
       this.dialogFormVisible = false;
-      this.sysuser = {};
     },
     edit(row) {
+    // 将选中行的数据赋值给 tableData，确保数据回显
+      this.tableData = { ...row };  // 使用 spread 操作符避免直接引用
+      this.dialogFormVisible = true;  // 打开对话框
       this.dialogFormVisible = true;
       this.dialogtitle = "编辑信息";
-      this.rowObj = JSON.parse(JSON.stringify(row))
-      this.sysuser=this.rowObj
-      this.readStatus=true
     },
     editPassWord(row) {
+      this.tableData = { ...row }; 
       this.passwordVisiable = true;
-      this.id = row.id;
     },
     addPetSys() {
       this.petSysDialogFormVisible = true;
@@ -752,7 +867,7 @@ export default {
     },
     // 上传照片成功的处理函数
     handleTeamMemberPhotoSuccess(member, response, file, fileList) {
-      member.photoSrc = response.url;
+      member.image = response.url;
     },
     // 上传之前的钩子函数，可以用来验证文件大小等
     beforeUpload(file) {
@@ -773,19 +888,87 @@ export default {
       // 提交后关闭对话框
       this.teamInfoDialogVisible = false;
     },
-    submitPetSys() {
-      // 处理提交逻辑
-      // 这里可以根据需要添加接口请求或其他处理
-      console.log(this.sysuser); // 打印数据，可以进行进一步的提交
-      this.petSysDialogFormVisible = false;
-      this.sysuser = {
-        carousel1Src: "",
-        carousel1Caption: "",
-        carousel2Src: "",
-        carousel2Caption: "",
-        carousel3Src: "",
-        carousel3Caption: "",
-      };
+  getHospitalInfo() {
+    api.get(`/admin/getHospital/1`)
+      .then((response) => {
+        if (response.data) {
+          this.petsys = response.data;
+          this.fileList1 = this.petsys.imageOne
+          ? [{ name: "已上传图片", url: this.petsys.imageOne }]
+          : [];
+        this.fileList2 = this.petsys.imageTwo
+          ? [{ name: "已上传图片", url: this.petsys.imageTwo }]
+          : [];
+        this.fileList3 = this.petsys.imageThree
+          ? [{ name: "已上传图片", url: this.petsys.imageThree }]
+          : [];  // 获取医院信息并填充到表单
+        }
+      })
+  },
+  submitPetSys() {
+    if (this.petsys.id) {
+      // 如果有 id，表示是编辑操作
+      api.put(`/admin/editHospital`, this.petsys)
+        .then((res) => {
+          if (res.code === 200) {
+            this.$message.success("更新成功！");
+            this.petSysDialogFormVisible = false;
+          } else {
+            this.$message.error("更新失败！");
+          }
+        })
+        .catch((error) => {
+          this.$message.error("提交失败，请稍后重试");
+        });
+    } else {
+      // 如果没有 id，表示是新增操作
+      this.petsys.id = 1
+      api.put(`/admin/editHospital`, this.petsys)  // 假设同一个接口用于新增
+        .then((res) => {
+          if (res.code === 200) {
+            this.$message.success("新增成功！");
+          } else {
+            this.$message.error("新增失败！");
+          }
+        })
+        .catch((error) => {
+          this.$message.error("提交失败，请稍后重试");
+        });
+    }
+  },
+    fetchUserList() {
+      api.get('/admin/getUser', {
+        params: {
+          page: this.pagination.currentPage,
+          size: this.pagination.pageSize
+        }
+      })
+        .then(response => {
+          if (response.code === 200) {
+            console.log("返回的数据:", response.rows);
+            this.tableData = response.rows;
+            this.pagination.total = response.total; // 假设后端返回 total
+          } else {
+            this.$message.error(response.message || '获取数据失败');
+          }
+        })
+        .catch(error => {
+          console.error('请求失败:', error);
+          this.$message.error('数据加载失败');
+        });
+    },
+
+    // 改变分页大小
+    sizeChange(newSize) {
+      this.pagination.pageSize = newSize;
+      this.pagination.currentPage = 1; // 重新从第一页开始
+      this.fetchUserList();
+    },
+
+    // 切换页码
+    currentChange(newPage) {
+      this.pagination.currentPage = newPage;
+      this.fetchUserList();
     },
     submitpassword() {
       if (this.password !== this.confirmpassword) {
@@ -794,128 +977,126 @@ export default {
       if (this.password.length < 6 || this.confirmpassword < 6) {
         return this.$message.error("密码必须6位数以上");
       } else {
-        let params = new URLSearchParams();
-        params.append("id", this.id);
-        params.append("password", this.password);
-        this.request.post("/user/updatePassword", params).then((res) => {
-          if (res.status === 200) {
-            this.$message.success("修改成功");
-            this.getUserList();
-            this.passwordVisiable = false;
-            this.password = "";
-            this.confirmpassword = "";
-          } else {
-            this.$message.error("修改失败");
-          }
-        });
-      }
-    },
-    getUserList() {
-      let params = new URLSearchParams();
-      if (this.role == "学生") {
-        params.append("userAccount", this.userAccount);
-      }
-      params.append("queryUserAccount", this.userAccountValue);
-      params.append("userName", this.nameValue);
-      params.append("role", this.role);
-      params.append("queryRole", this.roleValue);
-      params.append("pageNo", this.pagination.currentPage);
-      params.append("pageSize", this.pagination.pageSize);
-      this.request.post("/user/queryAllUser", params).then((res) => {
-        if (res.status === 200) {
-          this.tableData = res.data.sysUserList;
-          this.pagination.total = res.data.total;
+        const params = {
+      id: this.tableData.id,
+      password: this.password
+    };
+    api.put('/admin/editUser', params)
+      .then(response => {
+        if (response.code === 200) {
+          this.$message.success('编辑成功');
+          this.passwordVisiable = false;
+          this.fetchUserList();  // 刷新数据
         } else {
-          this.$message.error(res.msg);
+          this.$message.error('编辑失败');
         }
+      })
+      .catch(error => {
+        console.error('请求错误：', error);
+        this.$message.error('请求失败');
       });
+      }
     },
     cancelPassword() {
       this.passwordVisiable = false;
       this.password = "";
       this.confirmpassword = "";
     },
-    submitSysuser() {
-      let params = new URLSearchParams();
-      if(this.sysuser.userAccount==null){
-        return this.$message.error("账户不能为空");
-      }
-      if(this.sysuser.userName == null){
-        return this.$message.error("账户姓名不能为空");
-      }
-      if(this.sysuser.depName==null){
-        return this.$message.error("管理职务不能为空");
-      }
-      params.append("userAccount", this.sysuser.userAccount);
-      params.append("userName", this.sysuser.userName);
-      params.append("depName", this.sysuser.depName);
-      params.append("telNumber", this.sysuser.telNumber);
-      this.request.post("/user/addSysUser", params).then((res) => {
-        if (res.status === 200) {
-          this.$message.success("添加成功");
-          this.dialogFormVisible = false;
-          this.sysuser = {};
-          this.getUserList();
-        } else {
-          this.$message.error(res.msg);
-        }
-      });
-    },
-    updateSysuser() {
-      let params = new URLSearchParams();
-      if(this.sysuser.userAccount==null||this.sysuser.userAccount==''){
-        return this.$message.error("账户不能为空");
-      }
-      if(this.sysuser.userName == null||this.sysuser.userName ==''){
-        return this.$message.error("账户姓名不能为空");
-      }
-      if(this.sysuser.depName==null||this.sysuser.depName==''){
-        return this.$message.error("管理职务不能为空");
-      }
-      params.append("id", this.sysuser.id);
-      params.append("userAccount", this.sysuser.userAccount);
-      params.append("userName", this.sysuser.userName);
-      params.append("depName", this.sysuser.depName);
-      params.append("telNumber", this.sysuser.telNumber);
-      this.request.post("/user/updateSysUser", params).then((res) => {
-        if (res.status === 200) {
-          this.$message.success("编辑成功");
-          this.dialogFormVisible = false;
-          this.sysuser = {};
-          this.getUserList();
-        } else {
-          this.$message.error(res.msg);
-        }
-      });
-    },
     openDelete(row) {
-      this.$confirm("是否要删除该信息?", "提示", {
-        confirmButtonText: "确定",
-        cancelButtonText: "取消",
-        type: "warning",
-      }).then(() => {
-        let params = new URLSearchParams();
-        params.append("id", row.id);
-        this.request.post("/user/deleteSysUser", params).then((res) => {
-          if (res.status === 200) {
-            this.$message({
-              type: "success",
-              message: "删除成功!",
-            });
-            this.getUserList();
-          } else {
-            this.$message.error(res.msg);
-          }
-        });
+    // 弹出确认框，确认是否删除
+    this.$confirm('确定删除该用户吗?', '删除用户', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      // 调用删除接口
+      this.deleteUser(row.id);
+    }).catch(() => {
+      this.$message.info('已取消删除');
+    });
+  },
+  deleteUser(id) {
+    // 调用后端接口删除用户
+    api.delete(`/admin/deleteUser/${id}`).then((res) => {
+      if (res.code === 200) {
+        this.$message.success('删除成功');
+        this.fetchUserList(); // 重新加载用户列表
+      } else {
+        this.$message.error('删除失败');
+      }
+    });
+  },
+    submitEditUser() {
+    // 构造提交的数据
+    const updatedUser = {
+      id:this.tableData.id,
+      name:this.tableData.name,
+      phone: this.tableData.phone,
+      sex: this.tableData.sex,
+      // 根据后端需要，添加其它字段
+    };
+
+    // 发送 PUT 请求
+    api.put('/admin/editUser', updatedUser)
+      .then(response => {
+        if (response.code === 200) {
+          this.$message.success('编辑成功');
+          this.dialogFormVisible = false;
+          this.fetchUserList();  // 刷新数据
+        } else {
+          this.$message.error('编辑失败');
+        }
+      })
+      .catch(error => {
+        console.error('请求错误：', error);
+        this.$message.error('请求失败');
       });
     },
-    submittype(){
-      if(this.dialogtitle == "新增信息"){
-          this.submitSysuser()
-      }else{
-        this.updateSysuser()
-      }
-    },
+    submitPetInfo(pet) {
+  // 根据传入的 pet（pet1, pet2, pet3）进行验证
+  this.$refs[`${pet}Form`].validate((valid) => {
+    if (!valid) {
+      this.$message.error('请填写所有必填项');
+      return;
+    }
+
+    // 提交当前宠物数据
+    const petData = this[pet];  // 动态获取 pet1, pet2 或 pet3 对象
+
+    // 使用 axios 发送 PUT 请求到后端接口
+    console.log(petData);
+    api.put('/admin/editPetCyc', petData)
+      .then(response => {
+        if (response.code === 200) {
+          this.$message.success(`${pet} 更新成功`);
+          this.petInfoDialogVisible = false; // 关闭弹窗
+        } else {
+          this.$message.error(`${pet} 更新失败`);
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        this.$message.error('请求失败');
+      });
+  });
+},
+getPetCyc() {
+    api.get('/admin/getPetCyc')
+      .then(response => {
+        if (response.code === 200) {
+          const pets = response.data; // 假设返回的是一个宠物信息数组
+          this.pet1 = pets[0] || {};
+          this.pet2 = pets[1] || {};
+          this.pet3 = pets[2] || {};
+        } else {
+          this.$message.error('获取宠物信息失败');
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        this.$message.error('请求失败');
+      });
+  },
   },
 };
 </script>
@@ -926,6 +1107,15 @@ export default {
 }
 .headerClass {
   color: black;
+}
+.container_main_pagination {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;  /* 靠右 */
+  display: flex;
+  justify-content: flex-end;  /* 内容向右对齐 */
+  z-index: 10;
+  background: white;
 }
 .el-table th {
   background-color: #eee !important;

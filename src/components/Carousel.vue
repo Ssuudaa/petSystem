@@ -2,28 +2,44 @@
   <el-carousel :interval="5000" arrow="hover" height="400px" class="carousel">
     <el-carousel-item v-for="(image, index) in images" :key="index">
       <div class="carousel-content">
-        <img :src="image.src" :alt="image.alt" class="carousel-image" />
-        <div class="overlay">
-          <h3 class="overlay-text">{{ image.caption }}</h3>
-        </div>
+        <img :src="image" alt="轮播图" class="carousel-image" />
       </div>
     </el-carousel-item>
   </el-carousel>
 </template>
 
 <script>
+import api from '@/api.js';
+
+
 export default {
   name: 'Carousel',
   data() {
     return {
-      images: [
-        { src: '/image/m2.jpeg', alt: '轮播图1', caption: '宠物医疗服务' },
-        { src: '/image/m1.jpeg', alt: '轮播图2', caption: '关爱每一只宠物' },
-        { src: '/image/m3.jpeg', alt: '轮播图3', caption: '专业护理团队' }
-      ]
+      images: [] // 存放从 API 获取的图片
     };
+  },
+  mounted() {
+    this.fetchImages(); // 组件加载时获取数据
+  },
+  methods: {
+    async fetchImages() {
+      try {
+        const response = await api.get('/admin/getHospital/1'); // 调用 API
+        if (response.code == 200) {
+          const hospitalData = response.data;
+          this.images = [
+            hospitalData.imageOne,
+            hospitalData.imageTwo,
+            hospitalData.imageThree
+          ].filter(Boolean); // 过滤掉空值，避免出现空图片
+        }
+      } catch (error) {
+        console.error('获取轮播图失败:', error);
+      }
+    }
   }
-}
+};
 </script>
 
 <style scoped>
@@ -45,21 +61,7 @@ export default {
 .carousel-image {
   width: 100%;
   height: 400px;
-  object-fit: cover;
+  object-fit: fill; /* 拉伸图片以适应容器 */
   border-radius: 12px;
-}
-
-.overlay {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.6);
-  padding: 10px 20px;
-  border-radius: 8px;
-  color: #fff;
-  font-size: 1.2em;
-  text-align: center;
-  white-space: nowrap;
 }
 </style>

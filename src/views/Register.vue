@@ -13,7 +13,7 @@
           </div>
         </div>
         <div style="padding: 15px;">
-          <el-form :model="registerForm" ref="registerForm" :rules="registerRules" status-icon label-width="90px">
+          <el-form :model="registerForm" ref="registerForm" :rules="registerRules" label-width="90px">
             <el-row gutter="20">
               <!-- 个人信息 -->
               <el-col :span="12">
@@ -29,12 +29,15 @@
                 <el-form-item label="联系电话" prop="phone">
                   <el-input v-model="registerForm.phone" autocomplete="off" class="input-field" />
                 </el-form-item>
+                <el-form-item label="密码" prop="password">
+                  <el-input v-model="registerForm.password" autocomplete="off" class="input-field" />
+                </el-form-item>
               </el-col>
 
               <!-- 宠物信息 -->
               <el-col :span="12">
-                <el-form-item label="宠物爱称" prop="petname">
-                  <el-input v-model="registerForm.petname" autocomplete="off" class="input-field" />
+                <el-form-item label="宠物爱称" prop="petName">
+                  <el-input v-model="registerForm.petName" autocomplete="off" class="input-field" />
                 </el-form-item>
                 <el-form-item label="宠物月龄" prop="petMonth">
                   <el-input v-model="registerForm.petMonth" autocomplete="off" class="input-field" />
@@ -44,20 +47,20 @@
                 </el-form-item>
                 <el-form-item label="是否接种疫苗" prop="isVac">
                   <el-radio-group v-model="registerForm.isVac">
-                    <el-radio label="是">是</el-radio>
-                    <el-radio label="否">否</el-radio>
+                    <el-radio :label="1">是</el-radio>
+                    <el-radio :label="0">否</el-radio>
                   </el-radio-group>
                 </el-form-item>
-                <el-form-item v-if="registerForm.isVac === '是'" label="疫苗名称" prop="vacName">
+                <el-form-item v-if="registerForm.isVac === 1" label="疫苗名称" prop="vacName">
                   <el-input v-model="registerForm.vacName" autocomplete="off" class="input-field" />
                 </el-form-item>
                 <el-form-item label="过往病史" prop="isMedicalHistory">
                   <el-radio-group v-model="registerForm.isMedicalHistory">
-                    <el-radio label="是">是</el-radio>
-                    <el-radio label="否">否</el-radio>
+                    <el-radio :label="1">是</el-radio>
+                    <el-radio :label="0">否</el-radio>
                   </el-radio-group>
                 </el-form-item>
-                <el-form-item v-if="registerForm.isMedicalHistory === '是'" label="病史详情" prop="medicalHistoryDetails">
+                <el-form-item v-if="registerForm.isMedicalHistory === 1" label="病史详情" prop="medicalHistoryDetails">
                   <el-input v-model="registerForm.medicalHistoryDetails" autocomplete="off" class="input-field" />
                 </el-form-item>
               </el-col>
@@ -82,6 +85,8 @@
 
 <script>
 import Navbar from '../components/Navbar.vue';
+import api from '@/api.js';
+
 
 export default {
   components: {
@@ -91,9 +96,12 @@ export default {
     return {
       registerForm: {
         name: '',
-        sex: '',
+        password: '',
         phone: '',
-        petname: '',
+        sex: '',
+        role: 0,
+        petName: '',
+        petType: '',
         petMonth: '',
         petSpec: '',
         isVac: '',
@@ -102,37 +110,67 @@ export default {
         medicalHistoryDetails: ''
       },
       registerRules: {
-        name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-        sex: [{ required: true, message: '请选择性别', trigger: 'change' }],
-        phone: [
-          { required: true, message: '请输入联系电话', trigger: 'blur' },
+      name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+      password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+      phone: [
+          { required: true, message: '请输入手机号', trigger: 'blur' },
           { pattern: /^1[3-9]\d{9}$/, message: '请输入有效的手机号', trigger: 'blur' }
         ],
-        petname: [{ required: true, message: '请输入宠物爱称', trigger: 'blur' }],
-        petMonth: [{ required: true, message: '请输入宠物月龄', trigger: 'blur' }],
-        petSpec: [{ required: true, message: '请输入宠物品种', trigger: 'blur' }],
-        isVac: [{ required: true, message: '请选择是否接种疫苗', trigger: 'change' }],
-        vacName: [{ required: true, message: '请输入疫苗名称', trigger: 'blur' }],
-        isMedicalHistory: [{ required: true, message: '请选择是否有过往病史', trigger: 'change' }],
-        medicalHistoryDetails: [{ required: true, message: '请输入病史详情', trigger: 'blur' }]
-      }
+      sex: [{ required: true, message: '请选择性别', trigger: 'change' }],
+      petName: [{ required: true, message: '请输入宠物爱称', trigger: 'blur' }],
+      petMonth: [{ required: true, message: '请输入宠物月龄', trigger: 'blur' }],
+      petSpec: [{ required: true, message: '请输入具体品种', trigger: 'blur' }],
+      isVac: [{ required: true, message: '请选择是否接种疫苗', trigger: 'change' }],
+      vacName: [
+        { required: true, message: '请输入疫苗名称', trigger: 'blur', validator: (rule, value, callback) => {
+            if (this.registerForm.isVac === 1 && !value) {
+              callback(new Error('请输入疫苗名称'));
+            } else {
+              callback();
+            }
+          }
+        }
+      ],
+      isMedicalHistory: [{ required: true, message: '请选择是否有病史', trigger: 'change' }],
+      medicalHistoryDetails: [
+        { required: true, message: '请输入病史详情', trigger: 'blur', validator: (rule, value, callback) => {
+            if (this.registerForm.isMedicalHistory === 1 && !value) {
+              callback(new Error('请输入病史详情'));
+            } else {
+              callback();
+            }
+          }
+        }
+      ]
+    }
     };
   },
   methods: {
-    handleRegister() {
-      this.$refs.registerForm.validate(valid => {
+    async handleRegister() {
+      this.$refs.registerForm.validate(async valid => {
         if (valid) {
-          alert('注册成功！');
+          try {
+            const formData = new FormData();
+            Object.keys(this.registerForm).forEach(key => {
+              formData.append(key, this.registerForm[key]);
+            });
+            await api.post('/petHospital/register', formData, {
+              headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            this.$message.success('注册成功');
+            this.$router.push('/login');
+          } catch (error) {
+            console.error('注册失败', error);
+            this.$message.error('注册失败');
+          }
         } else {
-          console.log('表单验证失败');
-          return false;
+          this.$message.error('注册失败');
         }
       });
     }
   }
 };
 </script>
-
 <style scoped>
 .login-container {
   display: flex;
