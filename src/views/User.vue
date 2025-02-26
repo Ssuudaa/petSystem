@@ -678,7 +678,7 @@ handlePicturePreview(file) {
     currentChange(val) {
       const _this = this;
       _this.pagination.currentPage = val;
-      _this.getUserList();
+      _this.fetchUserList();
     },
     reset() {
       const _this = this;
@@ -716,21 +716,12 @@ handlePicturePreview(file) {
       api.get(`/admin/getUser?${queryString}`).then((response) => {
         if (response.code === 200) {
           // 假设返回的数据是tableData
-          this.tableData = response.rows;  // 更新表格数据
+          this.tableData = response.rows;
+          this.pagination.total = response.total  // 更新表格数据
         } else {
           this.$message.error('查询失败');
         }
       });
-    },
-    sizeChange(val) {
-      const _this = this;
-      _this.pagination.pageSize = val;
-      _this.getUserList();
-    },
-    sizeChange(val) {
-      const _this = this;
-      _this.pagination.pageSize = val;
-      _this.getUserList();
     },
     selectionChange(val) {
       const _this = this;
@@ -848,8 +839,8 @@ handlePicturePreview(file) {
     fetchUserList() {
       api.get('/admin/getUser', {
         params: {
-          page: this.pagination.currentPage,
-          size: this.pagination.pageSize
+          pageNum: this.pagination.currentPage,
+          pageSize: this.pagination.pageSize
         }
       })
         .then(response => {
@@ -1124,15 +1115,23 @@ getPetCyc() {
 .headerClass {
   color: black;
 }
-.container_main_pagination {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;  /* 靠右 */
-  display: flex;
-  justify-content: flex-end;  /* 内容向右对齐 */
-  z-index: 10;
-  background: white;
+.container_main_table {
+  height: 500px; /* 固定表格容器高度 */
+  overflow: auto; /* 让表格内部滚动 */
+  position: relative; /* 让分页器相对于它定位 */
+  border: 1px solid #ddd; /* 可选，增加边框美观 */
 }
+
+/* 让分页器固定在表格右下角 */
+.container_main_pagination {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  background: #fff; /* 防止分页器被表格内容遮挡 */
+  padding: 5px 10px;
+  z-index: 1000;
+}
+
 .el-table th {
   background-color: #eee !important;
 }
